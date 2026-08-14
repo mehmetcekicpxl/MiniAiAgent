@@ -1,4 +1,5 @@
-﻿using MiniAiAgent.Tools;
+﻿using MiniAiAgent.Agent;
+using MiniAiAgent.Tools;
 
 namespace MiniAiAgent
 {
@@ -6,6 +7,7 @@ namespace MiniAiAgent
     {
         static void Main(string[] args)
         {
+            // List files in the current directory
             var fileTool = new FileTool();
             var currentDirectory = Directory.GetCurrentDirectory();
             var files = fileTool.ListFiles(currentDirectory);
@@ -15,6 +17,12 @@ namespace MiniAiAgent
 
 
             }
+
+            // ai agent run 
+
+            var agent = new AiAgent();
+
+            agent.Run();
         }
     }
 }
