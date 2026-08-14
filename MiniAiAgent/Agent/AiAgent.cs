@@ -14,7 +14,7 @@ namespace MiniAiAgent.Agent
            // Add your AI agent logic here
            while(true)
             {
-                Console.Write("wat will je doen?  -->   ");
+                Console.Write("wat will je doen?  -->");
                 var input= Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(input))
                 {
