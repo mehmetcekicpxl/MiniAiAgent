@@ -7,20 +7,14 @@ namespace MiniAiAgent
     {
         static void Main(string[] args)
         {
-            // List files in the current directory
-            var fileTool = new FileTool();
-            var currentDirectory = Directory.GetCurrentDirectory();
-            var files = fileTool.ListFiles(currentDirectory);
-            foreach (var file in files)
-            {
-                Console.WriteLine($"File: {file}");
 
-
-            }
 
             // ai agent run 
 
-            var agent = new AiAgent();
+            var projectDirectory = Directory.GetParent(
+                Directory.GetCurrentDirectory())!.Parent!.Parent!.Parent!.Parent!.FullName;
+
+            var agent = new AiAgent(projectDirectory);
 
             agent.Run();
         }
