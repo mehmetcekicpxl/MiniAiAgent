@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MiniAiAgent.Tools;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,11 +9,21 @@ namespace MiniAiAgent.Agent
 {
     public class AiAgent
     {
+        private readonly FakeAi _fakeAi;
+        private readonly FileTool _fileTool;
+        private readonly string _projectDirectory;
+
+        public AiAgent(string projectDirectory)
+        {
+            _fakeAi = new FakeAi();
+            _fileTool = new FileTool();
+            _projectDirectory = projectDirectory;
+        }
         public void Run()
         {
-           // Console.WriteLine("AI Agent is running...");
-           // Add your AI agent logic here
-           while(true)
+           Console.WriteLine("Mini AI Agent is running. Type 'exit' to quit.");
+           
+           while (true)
             {
                 Console.Write("wat will je doen?  -->");
                 var input= Console.ReadLine();
@@ -25,9 +36,34 @@ namespace MiniAiAgent.Agent
                     Console.WriteLine("Exiting AI Agent...");
                     break;
                 }
-                Console.WriteLine($"You entered: {input}");
+                HandleRequest(input);
             }
 
+        }
+        private void HandleRequest(string input)
+        {
+            var toolCall =_fakeAi.Decide(input);
+
+            if(toolCall == null)
+            {
+                Console.WriteLine("Fake AI does not know what to do.");
+                return;
+            }
+            Console.WriteLine($"Fake AI wants to use: {toolCall.ToolName}");
+
+            if (toolCall.ToolName == "ListFiles")
+            {
+                
+
+                var files = _fileTool.ListFiles(_projectDirectory);
+
+                Console.WriteLine("Files found:");
+
+                foreach (var file in files)
+                {
+                    Console.WriteLine(file);
+                }
+            }
         }
     }
 }
