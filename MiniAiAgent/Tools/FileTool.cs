@@ -10,8 +10,31 @@ namespace MiniAiAgent.Tools
     {
         public string[] ListFiles(string directory)
         {
-            return Directory.GetFiles(
-                directory,"*",SearchOption.AllDirectories);
+            var excludedDirectories = new HashSet<string>(
+                StringComparer.OrdinalIgnoreCase)
+    {
+        ".git",
+        ".gitattributes",
+        ".gitignore",
+        "README.md",
+        ".vs",
+        "bin",
+        "obj"
+    };
+
+            return Directory
+                .EnumerateFiles(directory, "*", SearchOption.AllDirectories)
+                .Where(file =>
+                {
+                    var relativePath = Path.GetRelativePath(directory, file);
+
+                    var parts = relativePath.Split(
+                        Path.DirectorySeparatorChar,
+                        Path.AltDirectorySeparatorChar);
+
+                    return !parts.Any(part => excludedDirectories.Contains(part));
+                })
+                .ToArray();
         }
 
         public string ReadFile(string filePath)
