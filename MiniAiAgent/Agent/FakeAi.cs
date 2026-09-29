@@ -9,18 +9,35 @@ namespace MiniAiAgent.Agent
 {
     public class FakeAi
     {
-        public ToolCall? Decide( string userInput)
+        public ToolCall? Decide(string userInput)
         {
-            if (userInput.Contains("list files", StringComparison.OrdinalIgnoreCase))
+            if (userInput.Contains(
+                "list files",
+                StringComparison.OrdinalIgnoreCase))
             {
                 return new ToolCall
                 {
-                    ToolName = "ListFiles",
-                    
+                    ToolName = "ListFiles"
                 };
             }
+
+            if (userInput.StartsWith(
+                "read ",
+                StringComparison.OrdinalIgnoreCase))
+            {
+                var fileName = userInput["read ".Length..].Trim();
+
+                return new ToolCall
+                {
+                    ToolName = "ReadFile",
+                    Arguments = new Dictionary<string, string>
+                    {
+                        ["fileName"] = fileName
+                    }
+                };
+            }
+
             return null;
-               
         }
     }
 }
