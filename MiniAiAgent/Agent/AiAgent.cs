@@ -64,6 +64,25 @@ namespace MiniAiAgent.Agent
                     Console.WriteLine(file);
                 }
             }
+            if (toolCall.ToolName == "ReadFile")
+            {
+                if (!toolCall.Arguments.TryGetValue(
+                    "fileName",
+                    out var fileName))
+                {
+                    Console.WriteLine("File name is missing.");
+                    return;
+                }
+
+                var filePath = Path.Combine(
+                    _projectDirectory,
+                    fileName);
+
+                var content = _fileTool.ReadFile(filePath);
+
+                Console.WriteLine("File content:");
+                Console.WriteLine(content);
+            }
         }
     }
 }
