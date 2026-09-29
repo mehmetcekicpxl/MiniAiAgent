@@ -12,7 +12,7 @@ namespace MiniAiAgent
             // ai agent run 
 
             var projectDirectory = Directory.GetParent(
-                Directory.GetCurrentDirectory())!.Parent!.Parent!.Parent!.Parent!.FullName;
+                Directory.GetCurrentDirectory())!.Parent!.Parent!.FullName;
 
             var agent = new AiAgent(projectDirectory);
 
