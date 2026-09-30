@@ -5,11 +5,14 @@ namespace MiniAiAgent
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
 
 
             // ai agent run 
+            var ollamaTest = new OllamaTest();
+
+            await ollamaTest.RunAsync();
 
             var projectDirectory = Directory.GetParent(
                 Directory.GetCurrentDirectory())!.Parent!.Parent!.FullName;
