@@ -1,5 +1,6 @@
 ﻿using OllamaSharp;
 using System.Text;
+using MiniAiAgent.Models;
 
 namespace MiniAiAgent.Agent;
 
@@ -36,5 +37,22 @@ public class OllamaBrain
         }
 
         return stringBuilder.ToString();
+    }
+    public async Task<(ToolCall? toolCall, string responseText)> DecideAsync(string userInput)
+    {
+        var rawResponse = await ThinkAsync(userInput);
+
+       
+        if (rawResponse.StartsWith("TOOL: ListFiles", StringComparison.OrdinalIgnoreCase))
+        {
+            var call = new ToolCall
+            {
+                ToolName = "ListFiles"
+            };
+            return (call, rawResponse);
+        }
+
+        // If no tool was requested, ToolCall is empty (null); there is only chat text
+        return (null, rawResponse);
     }
 }

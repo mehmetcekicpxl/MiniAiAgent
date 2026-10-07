@@ -27,7 +27,7 @@ namespace MiniAiAgent.Agent
            
            while (true)
             {
-                Console.Write("\nwat will je doen?  -->");
+                Console.Write("\nwhat do you want to do?  -->");
                 var input= Console.ReadLine();
                 if (string.IsNullOrWhiteSpace(input))
                 {
@@ -44,45 +44,29 @@ namespace MiniAiAgent.Agent
         }
         private async Task HandleRequestAsync(string input)
         {
-            var toolCall = _fakeAi.Decide(input);
+            Console.WriteLine("\n[Qwen3 Thinking...]");
+            var aiResponse = await _brain.ThinkAsync(input);
 
-            // If FakeAi cannot generate a Tool prompt, we ask Ollama directly
-            if (toolCall == null)
+           
+            if (aiResponse.StartsWith("TOOL: ListFiles", StringComparison.OrdinalIgnoreCase))
             {
-                Console.WriteLine("\n[Fake AI did not recognise this request -> Qwen3 is thinking...]");
-                var aiResponse = await _brain.ThinkAsync(input);
-                Console.WriteLine("\n[Qwen3's answer]:");
-                Console.WriteLine(aiResponse);
+                Console.WriteLine("\n[Agent Decision]: The model wanted to use the 'ListFiles' tool!");
+                Console.WriteLine("Scanning files...\n");
+
+                // We are running our C# tool
+                var files = _fileTool.ListFiles(_projectDirectory);
+
+                Console.WriteLine("Found Files:");
+                foreach (var file in files)
+                {
+                    Console.WriteLine($"- {file}");
+                }
                 return;
             }
 
-            Console.WriteLine($"Fake AI wants to use: {toolCall.ToolName}");
-
-            if (toolCall.ToolName == "ListFiles")
-            {
-                var files = _fileTool.ListFiles(_projectDirectory);
-
-                Console.WriteLine("Files found:");
-                foreach (var file in files)
-                {
-                    Console.WriteLine(file);
-                }
-            }
-
-            if (toolCall.ToolName == "ReadFile")
-            {
-                if (!toolCall.Arguments.TryGetValue("fileName", out var fileName))
-                {
-                    Console.WriteLine("File name is missing.");
-                    return;
-                }
-
-                var filePath = Path.Combine(_projectDirectory, fileName);
-                var content = _fileTool.ReadFile(filePath);
-
-                Console.WriteLine("File content:");
-                Console.WriteLine(content);
-            }
+            // 2. If no tool was requested, this is a normal chat response
+            Console.WriteLine("\n[Qwen3 Response]:");
+            Console.WriteLine(aiResponse);
         }
     }
 }
