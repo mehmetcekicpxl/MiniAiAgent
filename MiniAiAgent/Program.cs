@@ -19,7 +19,7 @@ namespace MiniAiAgent
 
             var agent = new AiAgent(projectDirectory);
 
-            agent.Run();
+            await agent.RunAsync();
         }
     }
 }
