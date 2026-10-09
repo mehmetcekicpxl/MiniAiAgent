@@ -21,6 +21,7 @@ public class OllamaBrain
         _ollama = new OllamaApiClient(uri, "qwen3:4b");
     }
 
+    //The place where we ask the LLM a raw question and receive a text-based answer
     public async Task<string> ThinkAsync(string userInput)
     {
         var stringBuilder = new StringBuilder();
@@ -40,9 +41,10 @@ public class OllamaBrain
     }
     public async Task<(ToolCall? toolCall, string responseText)> DecideAsync(string userInput)
     {
+        // Ask the model to think about the user's input and return a raw response
         var rawResponse = await ThinkAsync(userInput);
 
-       
+        // Check if the raw response indicates a tool call
         if (rawResponse.StartsWith("TOOL: ListFiles", StringComparison.OrdinalIgnoreCase))
         {
             var call = new ToolCall
