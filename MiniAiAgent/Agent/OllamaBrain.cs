@@ -85,4 +85,26 @@ public class OllamaBrain
         // If no tool was requested, ToolCall is empty (null); there is only chat text
         return (null, rawResponse);
     }
+
+    // A method that feeds the result obtained after running the tool into the model to generate the final response
+    public async Task<string> AnswerWithToolResultAsync(string userOriginalInput, string toolOutput)
+    {
+        var stringBuilder = new StringBuilder();
+
+        var prompt =
+            $"The user asked: \"{userOriginalInput}\"\n" +
+            $"The tool was executed and returned the following data:\n" +
+            $"---\n{toolOutput}\n---\n" +
+            "Based on this data, provide a clear and helpful response to the user in their language.";
+
+        await foreach (var response in _ollama.GenerateAsync(prompt))
+        {
+            if (response != null && !string.IsNullOrEmpty(response.Response))
+            {
+                stringBuilder.Append(response.Response);
+            }
+        }
+
+        return stringBuilder.ToString().Trim();
+    }
 }

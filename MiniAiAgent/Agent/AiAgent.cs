@@ -59,10 +59,14 @@ namespace MiniAiAgent.Agent
             // 3. Model chose a tool!
             Console.WriteLine($"\n[Agent Decision]: Model chose the following tool -> {toolCall.ToolName}");
 
+            string toolResultData = string.Empty;
+
             if (toolCall.ToolName == "ListFiles")
             {
                 Console.WriteLine("Scanning files...\n");
                 var files = _fileTool.ListFiles(_projectDirectory);
+                // We are combining the list of files into a single text document
+                toolResultData = string.Join("\n", files);
 
                 Console.WriteLine("Found Files:");
                 foreach (var file in files)
@@ -72,28 +76,31 @@ namespace MiniAiAgent.Agent
             }
             else if (toolCall.ToolName == "ReadFile")
             {
-                // We are checking the parameters: has `fileName` been provided?
                 if (!toolCall.Arguments.TryGetValue("fileName", out var fileName) || string.IsNullOrWhiteSpace(fileName))
                 {
-                    Console.WriteLine("Error: Model did not specify a file name.");
+                    Console.WriteLine("Error: The model file name was not specified.");
                     return;
                 }
 
-                Console.WriteLine($"File to be read: {fileName}");
                 var filePath = Path.Combine(_projectDirectory, fileName);
 
                 if (!File.Exists(filePath))
                 {
-                    Console.WriteLine($"Error: '{fileName}' file not found.");
+                    Console.WriteLine($"Error: The file '{fileName}' could not be found.");
                     return;
                 }
 
-                var content = _fileTool.ReadFile(filePath);
-
-                Console.WriteLine("\n--- [File Contents] ---");
-                Console.WriteLine(content);
-                Console.WriteLine("------------------------");
+                Console.WriteLine($"File read: {fileName}");
+                toolResultData = _fileTool.ReadFile(filePath);
             }
+
+            // --- HERE IS THE AGENT LOOP (REACT) STEP ---
+            // We are sending the obtained data back to Qwen3 to get the final explanation!
+            Console.WriteLine("\n[Qwen3 Analyzing Data and Preparing Response...]");
+            var finalAnswer = await _brain.AnswerWithToolResultAsync(input, toolResultData);
+
+            Console.WriteLine("\n[Qwen3 Final Answer]:");
+            Console.WriteLine(finalAnswer);
 
         }
     }
