@@ -10,11 +10,17 @@ public class OllamaBrain
 
     // System instruction telling the model who it is and what tools it has at its disposal
     private const string SystemPrompt =
-        "You are an AI assistant in a C# project.\n" +
-        "You have access to a tool named 'ListFiles'.\n" +
-        "If the user wants to see, list, or check project files, respond ONLY with:\n" +
-        "TOOL: ListFiles\n" +
-        "Otherwise, answer normally in the user's language.";
+          "You are an AI assistant in a C# project.\n" +
+          "You have access to two tools:\n" +
+          "1. 'ListFiles': To list all files in the project.\n" +
+          "2. 'ReadFile': To read the content of a specific file.\n\n" +
+          "Rules for tool calling:\n" +
+          "- If the user wants to list or see project files, respond ONLY with:\n" +
+          "TOOL: ListFiles\n" +
+          "- If the user wants to read or see the content of a file, respond ONLY with:\n" +
+          "TOOL: ReadFile | fileName: <filename>\n" +
+          "Example: TOOL: ReadFile | fileName: Program.cs\n" +
+          "- Otherwise, answer normally in the user's language.";
     public OllamaBrain()
     {
         var uri = new Uri("http://localhost:11434");
@@ -44,13 +50,35 @@ public class OllamaBrain
         // Ask the model to think about the user's input and return a raw response
         var rawResponse = await ThinkAsync(userInput);
 
-        // Check if the raw response indicates a tool call
+        // Check if the raw response indicates a ListFiles tool call
         if (rawResponse.StartsWith("TOOL: ListFiles", StringComparison.OrdinalIgnoreCase))
         {
             var call = new ToolCall
             {
                 ToolName = "ListFiles"
             };
+            return (call, rawResponse);
+        }
+
+        // Check if the raw response indicates a ReadFile tool call
+        if (rawResponse.StartsWith("TOOL: ReadFile", StringComparison.OrdinalIgnoreCase))
+        {
+            var call = new ToolCall
+            {
+                ToolName = "ReadFile"
+            };
+
+            // "TOOL: ReadFile | fileName: Program.cs" We extract the file name from the text
+            if (rawResponse.Contains("fileName:"))
+            {
+                var parts = rawResponse.Split("fileName:", StringSplitOptions.TrimEntries);
+                if (parts.Length > 1)
+                {
+                    var fileName = parts[1].Trim();
+                    call.Arguments["fileName"] = fileName;
+                }
+            }
+
             return (call, rawResponse);
         }
 
