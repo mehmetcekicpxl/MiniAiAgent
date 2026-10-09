@@ -9,10 +9,6 @@ namespace MiniAiAgent
         {
 
 
-            // ai agent run 
-            var ollamaTest = new OllamaTest();
-
-            var answer = await ollamaTest.AskAsync("What is 2 + 2?");
 
             var projectDirectory = Directory.GetParent(
                 Directory.GetCurrentDirectory())!.Parent!.Parent!.FullName;
