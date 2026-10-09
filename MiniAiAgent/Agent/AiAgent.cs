@@ -95,9 +95,6 @@ namespace MiniAiAgent.Agent
                 Console.WriteLine("------------------------");
             }
 
-            // 2. If no tool was requested, this is a normal chat response
-            Console.WriteLine("\n[Qwen3 Response]:");
-            Console.WriteLine(aiResponse);
         }
     }
 }
