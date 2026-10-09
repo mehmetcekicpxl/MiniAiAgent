@@ -56,25 +56,43 @@ namespace MiniAiAgent.Agent
                 return;
             }
 
-            if (aiResponse.StartsWith("TOOL: ListFiles", StringComparison.OrdinalIgnoreCase))
+            // 3. Model chose a tool!
+            Console.WriteLine($"\n[Agent Decision]: Model chose the following tool -> {toolCall.ToolName}");
+
+            if (toolCall.ToolName == "ListFiles")
             {
-                Console.WriteLine($"\n[Agent Decision]:The model selected the following tool -> {toolCall.ToolName}");
-                if (toolCall.ToolName.Equals("ListFiles", StringComparison.OrdinalIgnoreCase))
+                Console.WriteLine("Scanning files...\n");
+                var files = _fileTool.ListFiles(_projectDirectory);
+
+                Console.WriteLine("Found Files:");
+                foreach (var file in files)
                 {
-                    Console.WriteLine("Scanning files...\n");
-                    // We are running our C# tool
-                    var files = _fileTool.ListFiles(_projectDirectory);
-
-                    Console.WriteLine("Found Files:");
-                    foreach (var file in files)
-                    {
-                        Console.WriteLine($"- {file}");
-                    }
+                    Console.WriteLine($"- {file}");
                 }
-                   
+            }
+            else if (toolCall.ToolName == "ReadFile")
+            {
+                // We are checking the parameters: has `fileName` been provided?
+                if (!toolCall.Arguments.TryGetValue("fileName", out var fileName) || string.IsNullOrWhiteSpace(fileName))
+                {
+                    Console.WriteLine("Error: Model did not specify a file name.");
+                    return;
+                }
 
-                
-                return;
+                Console.WriteLine($"File to be read: {fileName}");
+                var filePath = Path.Combine(_projectDirectory, fileName);
+
+                if (!File.Exists(filePath))
+                {
+                    Console.WriteLine($"Error: '{fileName}' file not found.");
+                    return;
+                }
+
+                var content = _fileTool.ReadFile(filePath);
+
+                Console.WriteLine("\n--- [File Contents] ---");
+                Console.WriteLine(content);
+                Console.WriteLine("------------------------");
             }
 
             // 2. If no tool was requested, this is a normal chat response
