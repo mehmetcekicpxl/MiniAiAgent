@@ -46,21 +46,34 @@ namespace MiniAiAgent.Agent
         {
             Console.WriteLine("\n[Qwen3 Thinking...]");
             var aiResponse = await _brain.ThinkAsync(input);
+            var (toolCall, responseText) = await _brain.DecideAsync(input);
 
-           
+            // if its not a tool call, we just print the response
+            if (toolCall == null)
+            {
+                Console.WriteLine("\n[Qwen3 Chat]:");
+                Console.WriteLine(responseText);
+                return;
+            }
+
             if (aiResponse.StartsWith("TOOL: ListFiles", StringComparison.OrdinalIgnoreCase))
             {
-                Console.WriteLine("\n[Agent Decision]: The model wanted to use the 'ListFiles' tool!");
-                Console.WriteLine("Scanning files...\n");
-
-                // We are running our C# tool
-                var files = _fileTool.ListFiles(_projectDirectory);
-
-                Console.WriteLine("Found Files:");
-                foreach (var file in files)
+                Console.WriteLine($"\n[Agent Decision]:The model selected the following tool -> {toolCall.ToolName}");
+                if (toolCall.ToolName.Equals("ListFiles", StringComparison.OrdinalIgnoreCase))
                 {
-                    Console.WriteLine($"- {file}");
+                    Console.WriteLine("Scanning files...\n");
+                    // We are running our C# tool
+                    var files = _fileTool.ListFiles(_projectDirectory);
+
+                    Console.WriteLine("Found Files:");
+                    foreach (var file in files)
+                    {
+                        Console.WriteLine($"- {file}");
+                    }
                 }
+                   
+
+                
                 return;
             }
 
