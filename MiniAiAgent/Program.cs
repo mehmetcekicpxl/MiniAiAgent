@@ -5,18 +5,17 @@ namespace MiniAiAgent
 {
     internal class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
 
 
-            // ai agent run 
 
             var projectDirectory = Directory.GetParent(
                 Directory.GetCurrentDirectory())!.Parent!.Parent!.FullName;
 
             var agent = new AiAgent(projectDirectory);
 
-            agent.Run();
+            await agent.RunAsync();
         }
     }
 }
